@@ -11,6 +11,17 @@ CTestTestfile.cmake
 _deps
 CMakeUserPresets.json
 
+generated
+.cache
+*.bin
+*.dis
+*.elf
+*.map
+*.hex
+*.uf2
+pico-sdk
+pico_flash_region.ld
+
 # CLion
 #  JetBrains specific template is maintained in a separate JetBrains.gitignore that can
 #  be found at https://github.com/github/gitignore/blob/main/Global/JetBrains.gitignore
