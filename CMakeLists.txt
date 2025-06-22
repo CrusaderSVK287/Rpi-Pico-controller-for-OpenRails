@@ -20,7 +20,10 @@ add_executable(rpi-pico-openrails-controller
 target_include_directories(rpi-pico-openrails-controller PRIVATE src)
 
 # Link with standard Pico SDK libraries
-target_link_libraries(rpi-pico-openrails-controller pico_stdlib)
+target_link_libraries(rpi-pico-openrails-controller 
+    pico_stdlib
+    hardware_adc
+)
 
 # Generate UF2 and related binaries
 pico_add_extra_outputs(rpi-pico-openrails-controller)
