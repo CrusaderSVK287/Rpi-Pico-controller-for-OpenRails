@@ -8,25 +8,30 @@ include(pico_sdk_import.cmake)
 project(rpi-pico-openrails-controller C CXX ASM)
 
 # Initialize the SDK
-set(PICO_CXX_ENABLE_EXCEPTIONS 1)
 pico_sdk_init()
 # Add executable and sources
 add_executable(rpi-pico-openrails-controller
-    src/main.cpp
-    src/blink.cpp
+    src/main.c
 )
 
 # Include directories
 target_include_directories(rpi-pico-openrails-controller PRIVATE src)
 
+# Enable TinyUSB device
+target_compile_definitions(rpi-pico-openrails-controller PRIVATE
+    PICO_STDIO_USB=1
+)
+
 # Link with standard Pico SDK libraries
 target_link_libraries(rpi-pico-openrails-controller 
     pico_stdlib
     hardware_adc
+    tinyusb_device
+    tinyusb_board
 )
 
 # Generate UF2 and related binaries
 pico_add_extra_outputs(rpi-pico-openrails-controller)
 
-pico_enable_stdio_usb(rpi-pico-openrails-controller 1)
-pico_enable_stdio_uart(rpi-pico-openrails-controller 0)
+# pico_enable_stdio_usb(rpi-pico-openrails-controller 1)
+# pico_enable_stdio_uart(rpi-pico-openrails-controller 0)
