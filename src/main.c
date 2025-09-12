@@ -1,6 +1,7 @@
 #include "pico/stdlib.h"
 #include "pico/time.h"
 #include "bsp/board.h"
+#include "hardware/adc.h"
 #include "tusb.h"
 #include "class/hid/hid.h"
 #include <string.h>
@@ -75,12 +76,20 @@ uint8_t const* tud_descriptor_device_cb(void) {
 
 void send_input_report(uint16_t x_axis, bool button_pressed)
 {
+    // to avoid compiler complaining for unused parameters
+    (void) x_axis;
+    (void) button_pressed;
+
     if (!tud_hid_ready()) return;
 
+    adc_select_input(0);
+    uint16_t analog = adc_read(); // set up for test analog pin
+    bool digital = gpio_get(5); // test digital pin
+
     uint8_t report[3];
-    report[0] = x_axis & 0xFF;
-    report[1] = (x_axis >> 8) & 0xFF;
-    report[2] = button_pressed ? 0x01 : 0x00; // LSB is button, remaining bits are padding
+    report[0] = analog & 0xFF;
+    report[1] = (analog >> 8) & 0xFF;
+    report[2] = digital ? 0x01 : 0x00; // LSB is button, remaining bits are padding
 
     tud_hid_report(0, report, sizeof(report));
 }
@@ -115,6 +124,12 @@ int main(void)
 {
     board_init();
     tusb_init();
+
+    adc_gpio_init(26);  // test analog pin
+    gpio_init(5);       // test digital pin
+    gpio_set_dir(5, GPIO_IN); // set direction to input
+
+    adc_init();
 
     while (1)
     {
