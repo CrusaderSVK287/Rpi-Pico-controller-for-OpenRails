@@ -1,0 +1,10 @@
+[package]
+name = "Rpi-Pico-controller-for-OpenRails"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+
+[[bin]]
+name = "Rpi-Pico-controller-for-OpenRails"
+path = "main.rs"
