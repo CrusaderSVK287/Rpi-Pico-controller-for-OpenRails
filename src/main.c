@@ -29,19 +29,53 @@ uint8_t const desc_hid_report[] = {
     HID_USAGE_PAGE(HID_USAGE_PAGE_GENERIC_DESKTOP),
     HID_USAGE(HID_USAGE_JOYSTICK),
     HID_COLLECTION(HID_COLLECTION_APPLICATION),
+
+        // --- Analog axes (X, Y, Z) ---
         HID_USAGE(HID_USAGE_X),
         HID_LOGICAL_MIN(0),
         HID_LOGICAL_MAX(1023),
-        HID_REPORT_SIZE(8),
-        HID_REPORT_COUNT(2),  // 2 bytes for 16-bit analog value
+        HID_REPORT_SIZE(8),          // 1 byte
+        HID_REPORT_COUNT(6),         // 2 bytes per axis × 3 axes = 6 bytes
         HID_INPUT(HID_DATA | HID_VARIABLE | HID_ABSOLUTE),
+
+        // --- Digital inputs: 1 button + 5 two-state switches ---
         HID_USAGE_PAGE(HID_USAGE_PAGE_BUTTON),
         HID_USAGE_MIN(1),
-        HID_USAGE_MAX(1),
-        HID_REPORT_SIZE(8),
-        HID_REPORT_COUNT(1),  // 1 byte for button
+        HID_USAGE_MAX(6),            // 1 button + 5 switches
+        HID_REPORT_SIZE(1),          // 1 bit per button/switch
+        HID_REPORT_COUNT(6),
         HID_INPUT(HID_DATA | HID_VARIABLE | HID_ABSOLUTE),
-    HID_COLLECTION_END,
+
+        // Padding to complete the byte
+        HID_REPORT_SIZE(2),
+        HID_REPORT_COUNT(1),
+        HID_INPUT(HID_CONSTANT),
+
+        // --- Multi-state switches ---
+        // 3-state switch (2 bits)
+        HID_USAGE_MIN(7),
+        HID_USAGE_MAX(7),
+        HID_LOGICAL_MIN(0),
+        HID_LOGICAL_MAX(2),
+        HID_REPORT_SIZE(2),
+        HID_REPORT_COUNT(1),
+        HID_INPUT(HID_DATA | HID_VARIABLE | HID_ABSOLUTE),
+
+        // 4-state switch (2 bits)
+        HID_USAGE_MIN(8),
+        HID_USAGE_MAX(8),
+        HID_LOGICAL_MIN(0),
+        HID_LOGICAL_MAX(3),
+        HID_REPORT_SIZE(2),
+        HID_REPORT_COUNT(1),
+        HID_INPUT(HID_DATA | HID_VARIABLE | HID_ABSOLUTE),
+
+        // Padding to complete the second byte
+        HID_REPORT_SIZE(4),
+        HID_REPORT_COUNT(1),
+        HID_INPUT(HID_CONSTANT),
+
+    HID_COLLECTION_END
 };
 
 uint8_t const* tud_hid_descriptor_report_cb(uint8_t instance) {
@@ -86,10 +120,40 @@ void send_input_report(uint16_t x_axis, bool button_pressed)
     uint16_t analog = adc_read(); // set up for test analog pin
     bool digital = gpio_get(5); // test digital pin
 
-    uint8_t report[3];
-    report[0] = analog & 0xFF;
-    report[1] = (analog >> 8) & 0xFF;
-    report[2] = digital ? 0x01 : 0x00; // LSB is button, remaining bits are padding
+    //uint8_t report[3];
+    //report[0] = analog & 0xFF;
+    //report[1] = (analog >> 8) & 0xFF;
+    //report[2] = digital ? 0x01 : 0x00; // LSB is button, remaining bits are padding
+    // Static report for testing purposes
+    // 3 analog axes (2 bytes each), example values 0x0123, 0x0456, 0x0789
+    // Digital byte 1: 1 button pressed + 5 two-state switches set to example states
+    // Digital byte 2: 3-state switch = 2, 4-state switch = 3
+    uint8_t report[8];
+
+    // Analog axes (X, Y, Z)
+    report[0] = 0x23;              // throttle low byte
+    report[1] = 0x01;              // throttle high byte
+    report[2] = 0x56;              // direction low byte
+    report[3] = 0x04;              // direction high byte
+    report[4] = 0x89;              // brake low byte
+    report[5] = 0x07;              // brake high byte
+
+    // Digital byte 1: button + 5 two-state switches
+    // Button pressed (bit 0 = 1)
+    // 5 switches example state: 10101 → bits 1-5
+    report[6] = (1 << 0)           // button
+              | (1 << 1)           // switch 1
+              | (0 << 2)           // switch 2
+              | (1 << 3)           // switch 3
+              | (0 << 4)           // switch 4
+              | (1 << 5);          // switch 5
+    // Bits 6-7 are padding, left as 0
+
+    // Digital byte 2: 3-state and 4-state switches
+    // 3-state switch = 2 (bits 0-1), 4-state switch = 3 (bits 2-3)
+    report[7] = (2 & 0x03)         // 3-state switch
+              | ((3 & 0x03) << 2); // 4-state switch
+    // Bits 4-7 are padding, left as 0
 
     tud_hid_report(0, report, sizeof(report));
 }
