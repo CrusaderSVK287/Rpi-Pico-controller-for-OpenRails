@@ -26,8 +26,9 @@ project(rpi-pico-openrails-controller C CXX ASM)
 # Initialize the SDK
 pico_sdk_init()
 # Add executable and sources
+file(GLOB SRC_FILES "src/*.c")
 add_executable(rpi-pico-openrails-controller
-    src/main.c
+    ${SRC_FILES}
 )
 
 # Include directories
