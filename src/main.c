@@ -3,16 +3,13 @@
 #include "tusb.h"
 
 #include "sensors.h"
+#include <hardware/gpio.h>
+#include <stdint.h>
 
 void send_input_report(const struct sensor_data *data)
 {
     if (!tud_hid_ready()) return;
     if (!data) return;
-
-    // Just keeping this here for now
-    //adc_select_input(0);
-    //uint16_t analog = adc_read(); // set up for test analog pin
-    //bool digital = gpio_get(5); // test digital pin
 
     uint8_t report[8];
 
@@ -27,12 +24,12 @@ void send_input_report(const struct sensor_data *data)
     report[5] = (uint8_t)((data->engine_break >> 8) & 0xFF);
 
     // Digital byte 1: button + 5 two-state switches
-    report[6] = (data->pause << 0)          // button
-              | (data->track_monitor << 1)  // switch 1
-              | (data->next_station << 2)   // switch 2
-              | (data->headlights << 3)     // switch 3
-              | (data->pantograph1 << 4)    // switch 4
-              | (data->pantograph2 << 5);   // switch 5
+    report[6] = (data->pause << 0) 
+              | (data->track_monitor << 1)
+              | (data->next_station << 2)
+              | (data->headlights << 3)
+              | (data->pantograph1 << 4)
+              | (data->pantograph2 << 5);
     // Bits 6-7 are padding, left as 0
 
     // Digital byte 2: 3-state and 4-state switches
@@ -61,21 +58,37 @@ void tud_hid_report_complete_cb(uint8_t instance, uint8_t const* report, uint16_
     send_input_report(&data);       
 }
 
-// Main loop
 int main(void)
 {
     board_init();
     tusb_init();
 
-    adc_gpio_init(26);  // test analog pin
-    gpio_init(5);       // test digital pin
-    gpio_set_dir(5, GPIO_IN); // set direction to input
+    // analog pin setup
+    adc_gpio_init(APIN_THROTTLE);
+    adc_gpio_init(APIN_DIRECTION);
+    adc_gpio_init(APIN_ENGINE_BREAK);
+    
+    // digital pins setup
+    // there is no PIN1_TRAIN_BRAKE
+    const uint8_t pins[] = { PIN_PANTOGRAPH1, PIN_PANTOGRAPH2, PIN_HEADLIGHTS, PIN_TRACK_MONITOR, 
+        PIN_NEXT_STATION,  PIN_PAUSE, PIN1_VIEW, PIN2_VIEW, PIN2_TRAIN_BRAKE,  
+        PIN3_TRAIN_BRAKE,  PIN4_TRAIN_BRAKE   
+    };
+    const size_t pinCount = sizeof(pins) / sizeof(pins[0]);
 
+    for (size_t i = 0; i < pinCount; i++) {
+        uint8_t pin = pins[i];
+        gpio_init(pin);
+        gpio_set_dir(pin, GPIO_IN);
+        gpio_pull_down(pin);
+    }
+
+    // initialisite the analog to digital converter
     adc_init();
 
     while (1)
     {
-        tud_task(); // tinyusb device task
+        tud_task();
     }
 }
 
