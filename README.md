@@ -11,7 +11,7 @@ corners. This repository contains:
 
 ## Supported controls
 
-The controller's layout and looks is highly inspired by Czechoslovak locomotives from the 1970'-90' ![For example the 754 series](https://cs.wikipedia.org/wiki/Lokomotiva_754)
+The controller's layout and looks is highly inspired by Czechoslovak locomotives from the 1970'-90' [For example the 754 series](https://cs.wikipedia.org/wiki/Lokomotiva_754)
 
 ### Analog controls
 - Direction: the red lever, controlls the reverser of the train.
@@ -29,9 +29,12 @@ The controller's layout and looks is highly inspired by Czechoslovak locomotives
 
 # Aditional software that is needed
 
-The OpenRails modification that includes code that interprets the HID controller is in ![this repository](https://github.com/CrusaderSVK287/openrails).
+The OpenRails modification that includes code that interprets the HID controller is in [this repository](https://github.com/CrusaderSVK287/openrails).
 <br>
-In addition I made a simple app to test whether the controller is working properly, ![here](https://github.com/CrusaderSVK287/OpenRails-HID-Tester).
+In addition I made a simple app to test whether the controller is working properly, [here](https://github.com/CrusaderSVK287/OpenRails-HID-Tester).
 
-## Showcase
-You can watch [This video](https://www.youtube.com/watch?v=ZfCk2OY4qJo).
+## 🎥 Showcase
+
+Click the image below to watch the demo. (Will redirect to youtube)
+
+[![Watch the demo](https://img.youtube.com/vi/ZfCk2OY4qJo/maxresdefault.jpg)](https://www.youtube.com/watch?v=ZfCk2OY4qJo)
